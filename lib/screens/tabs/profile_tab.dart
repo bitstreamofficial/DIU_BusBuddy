@@ -360,10 +360,11 @@ class ProfileTab extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20), // Route Map
+                  const SizedBox(height: 20),
+
+                  // Route Map
                   Container(
                     width: double.infinity,
-                    height: 220,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8F9FA),
                       borderRadius: BorderRadius.circular(12),
@@ -373,6 +374,7 @@ class ProfileTab extends StatelessWidget {
                       ),
                     ),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // Route header
                         Container(
@@ -419,34 +421,41 @@ class ProfileTab extends StatelessWidget {
                             ],
                           ),
                         ), // Route stops
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                _buildRouteStop(
-                                  stopName: 'Dhanmondi 27',
-                                  isStart: true,
-                                  isEnd: false,
-                                ),
-                                _buildRouteStop(
-                                  stopName: 'Kalabagan',
-                                  isStart: false,
-                                  isEnd: false,
-                                ),
-                                _buildRouteStop(
-                                  stopName: 'Green Road',
-                                  isStart: false,
-                                  isEnd: false,
-                                ),
-                                _buildRouteStop(
-                                  stopName: 'DIU Campus',
-                                  isStart: false,
-                                  isEnd: true,
-                                ),
-                              ],
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildRouteStop(
+                                stopName: 'Dhanmondi 27',
+                                isStart: true,
+                                isEnd: false,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildRouteStop(
+                                stopName: 'Mirpur 1',
+                                isStart: false,
+                                isEnd: false,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildRouteStop(
+                                stopName: 'Kalabagan',
+                                isStart: false,
+                                isEnd: false,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildRouteStop(
+                                stopName: 'Green Road',
+                                isStart: false,
+                                isEnd: false,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildRouteStop(
+                                stopName: 'DIU Campus',
+                                isStart: false,
+                                isEnd: true,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -725,50 +734,47 @@ class ProfileTab extends StatelessWidget {
     required bool isStart,
     required bool isEnd,
   }) {
-    return Flexible(
-      child: Row(
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color:
-                      isStart || isEnd
-                          ? const Color(0xFF007AFF)
-                          : Colors.black.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              if (!isEnd)
-                Container(
-                  width: 2,
-                  height: 16,
-                  color: Colors.black.withOpacity(0.2),
-                ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              stopName,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight:
-                    isStart || isEnd ? FontWeight.w600 : FontWeight.w400,
+    return Row(
+      children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
                 color:
                     isStart || isEnd
                         ? const Color(0xFF007AFF)
-                        : Colors.black.withOpacity(0.7),
-                letterSpacing: -0.1,
+                        : Colors.black.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(6),
               ),
-              overflow: TextOverflow.ellipsis,
             ),
+            if (!isEnd)
+              Container(
+                width: 2,
+                height: 16,
+                color: Colors.black.withOpacity(0.2),
+              ),
+          ],
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            stopName,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isStart || isEnd ? FontWeight.w600 : FontWeight.w400,
+              color:
+                  isStart || isEnd
+                      ? const Color(0xFF007AFF)
+                      : Colors.black.withOpacity(0.7),
+              letterSpacing: -0.1,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
