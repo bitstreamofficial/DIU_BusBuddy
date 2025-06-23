@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'student_signup_screen.dart';
 import 'student_dashboard_screen.dart';
-import 'guest_dashboard_screen.dart';
+import '../../guest_dashboard_screen.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   const StudentLoginScreen({super.key});

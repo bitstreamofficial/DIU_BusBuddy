@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import 'tabs/dashboard_tab.dart';
-import 'tabs/schedule_tab.dart';
-import 'tabs/notice_tab.dart';
-import 'tabs/profile_tab.dart';
+import '../../admin_tabs/admin_dashboard_tab.dart';
+import '../../admin_tabs/admin_schedule_tab.dart';
+import '../../admin_tabs/admin_manage_tab.dart';
+import '../../admin_tabs/admin_profile_tab.dart';
 
-class StudentDashboardScreen extends StatefulWidget {
-  const StudentDashboardScreen({super.key});
+class AdminDashboardScreen extends StatefulWidget {
+  const AdminDashboardScreen({super.key});
 
   @override
-  State<StudentDashboardScreen> createState() => _StudentDashboardScreenState();
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const DashboardTab(),
-    const ScheduleTab(),
-    const NoticeTab(),
-    const ProfileTab(),
+    const AdminDashboardTab(),
+    const AdminScheduleTab(),
+    const AdminManageTab(),
+    const AdminProfileTab(),
   ];
 
   @override
@@ -32,6 +32,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           border: Border(
             top: BorderSide(color: Colors.black.withOpacity(0.1), width: 0.5),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: SafeArea(
           child: Padding(
@@ -40,8 +47,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home_rounded,
+                  icon: Icons.dashboard_outlined,
+                  activeIcon: Icons.dashboard_rounded,
                   label: 'Dashboard',
                   index: 0,
                 ),
@@ -52,9 +59,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   index: 1,
                 ),
                 _buildNavItem(
-                  icon: Icons.notifications_outlined,
-                  activeIcon: Icons.notifications_rounded,
-                  label: 'Notice',
+                  icon: Icons.add_circle_outline_rounded,
+                  activeIcon: Icons.add_circle_rounded,
+                  label: 'Manage',
                   index: 2,
                 ),
                 _buildNavItem(
@@ -103,18 +110,18 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               color:
                   isActive
                       ? const Color(0xFF007AFF)
-                      : Colors.black.withOpacity(0.5),
+                      : Colors.black.withOpacity(0.6),
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                 color:
                     isActive
                         ? const Color(0xFF007AFF)
-                        : Colors.black.withOpacity(0.5),
+                        : Colors.black.withOpacity(0.6),
                 letterSpacing: -0.1,
               ),
             ),

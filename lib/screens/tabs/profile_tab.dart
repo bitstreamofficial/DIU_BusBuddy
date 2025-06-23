@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:diu_busbuddy/screens/student_login_screen.dart';
+import 'package:diu_busbuddy/screens/auth/student_auth/student_login_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfileTab extends StatelessWidget {
@@ -195,10 +195,12 @@ class ProfileTab extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.person_rounded,
-                                size: 40,
-                                color: Colors.white,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: const Image(
+                                  image: AssetImage('assets/profile.png'),
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
 

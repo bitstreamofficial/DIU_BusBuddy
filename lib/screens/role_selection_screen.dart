@@ -1,104 +1,279 @@
 import 'package:flutter/material.dart';
-import 'student_login_screen.dart';
-import 'admin_login_screen.dart';
+import 'auth/student_auth/student_login_screen.dart';
+import 'auth/admin_auth/admin_login_screen.dart';
+import '../utils/responsive_utils.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 80), // App Icon and Title Section
-              Column(
-                children: [
-                  // App logo
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(26),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF007AFF).withOpacity(0.25),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(26),
-                      child: Image.asset(
-                        'assets/logo.png',
-                        width: 120,
-                        height: 120,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+          padding: EdgeInsets.symmetric(horizontal: context.horizontalPadding),
+          child:
+              context.isLandscape
+                  ? _buildLandscapeLayout(context)
+                  : _buildPortraitLayout(context),
+        ),
+      ),
+    );
+  }
 
-                  // App name
-                  const Text(
-                    'DIU Bus Buddy',
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF000000),
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+  Widget _buildPortraitLayout(BuildContext context) {
+    final logoSize = ResponsiveUtils.getLogoSize(context);
+    final appTitleSize = context.responsiveFont(34.0);
+    final subtitleSize = context.responsiveFont(17.0);
+    final welcomeSize = context.responsiveFont(28.0);
 
-                  // Subtitle
-                  Text(
-                    'Your Campus Transportation Companion',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black.withOpacity(0.6),
-                      letterSpacing: -0.2,
-                    ),
-                    textAlign: TextAlign.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(height: context.heightPercent(10)), // 10% of screen height
+        // App Icon and Title Section
+        Column(
+          children: [
+            // App logo
+            Container(
+              width: logoSize,
+              height: logoSize,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(logoSize * 0.22),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF007AFF).withOpacity(0.25),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 80),
-
-              // Welcome text
-              const Text(
-                'Welcome',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF000000),
-                  letterSpacing: -0.3,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(logoSize * 0.22),
+                child: Image.asset(
+                  'assets/logo.png',
+                  width: logoSize,
+                  height: logoSize,
+                  fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Choose your role to get started',
+            ),
+            SizedBox(height: context.heightPercent(3)),
+
+            // App name
+            Text(
+              'DIU Bus Buddy',
+              style: TextStyle(
+                fontSize: appTitleSize,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF000000),
+                letterSpacing: -0.5,
+              ),
+            ),
+            SizedBox(height: context.heightPercent(1)),
+
+            // Subtitle
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.widthPercent(5),
+              ),
+              child: Text(
+                'Your Campus Transportation Companion',
                 style: TextStyle(
-                  fontSize: 17,
+                  fontSize: subtitleSize,
                   fontWeight: FontWeight.w400,
                   color: Colors.black.withOpacity(0.6),
                   letterSpacing: -0.2,
                 ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: context.heightPercent(10)),
+
+        // Welcome text
+        Text(
+          'Welcome',
+          style: TextStyle(
+            fontSize: welcomeSize,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF000000),
+            letterSpacing: -0.3,
+          ),
+        ),
+        SizedBox(height: context.heightPercent(1)),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: context.widthPercent(5)),
+          child: Text(
+            'Choose your role to get started',
+            style: TextStyle(
+              fontSize: subtitleSize,
+              fontWeight: FontWeight.w400,
+              color: Colors.black.withOpacity(0.6),
+              letterSpacing: -0.2,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+
+        SizedBox(height: context.heightPercent(8)),
+
+        // Role selection buttons
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Student button
+              _buildRoleButton(
+                context: context,
+                title: 'Student',
+                subtitle: 'Access schedules and track buses',
+                icon: Icons.school_outlined,
+                onTap: () => _navigateToStudentLogin(context),
+                isPrimary: true,
               ),
 
-              const SizedBox(height: 60),
+              SizedBox(height: context.heightPercent(2)),
+
+              // Admin button
+              _buildRoleButton(
+                context: context,
+                title: 'Admin',
+                subtitle: 'Manage and monitor schedules',
+                icon: Icons.admin_panel_settings_outlined,
+                onTap: () => _navigateToAdminLogin(context),
+                isPrimary: false,
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: context.heightPercent(5)),
+
+        // Footer
+        Text(
+          '© 2025 Daffodil International University',
+          style: TextStyle(
+            fontSize: context.isTablet ? 15.0 : 13.0,
+            fontWeight: FontWeight.w400,
+            color: Colors.black.withOpacity(0.4),
+            letterSpacing: -0.1,
+          ),
+        ),
+        SizedBox(height: context.heightPercent(4)),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeLayout(BuildContext context) {
+    final logoSize = ResponsiveUtils.getLogoSize(context);
+    final appTitleSize = context.responsiveFont(28.0);
+    final subtitleSize = context.responsiveFont(15.0);
+    final welcomeSize = context.responsiveFont(24.0);
+
+    return Row(
+      children: [
+        // Left side - Logo and title
+        Expanded(
+          flex: 1,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // App logo
+              Container(
+                width: logoSize,
+                height: logoSize,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(logoSize * 0.22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF007AFF).withOpacity(0.25),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(logoSize * 0.22),
+                  child: Image.asset(
+                    'assets/logo.png',
+                    width: logoSize,
+                    height: logoSize,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              SizedBox(height: context.heightPercent(3)),
+
+              // App name
+              Text(
+                'DIU Bus Buddy',
+                style: TextStyle(
+                  fontSize: appTitleSize,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF000000),
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: context.heightPercent(1.5)),
+
+              // Subtitle
+              Text(
+                'Your Campus Transportation\nCompanion',
+                style: TextStyle(
+                  fontSize: subtitleSize,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black.withOpacity(0.6),
+                  letterSpacing: -0.2,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+
+        // Right side - Welcome and buttons
+        Expanded(
+          flex: 1,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Welcome text
+              Text(
+                'Welcome',
+                style: TextStyle(
+                  fontSize: welcomeSize,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF000000),
+                  letterSpacing: -0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: context.heightPercent(1)),
+              Text(
+                'Choose your role to get started',
+                style: TextStyle(
+                  fontSize: subtitleSize,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black.withOpacity(0.6),
+                  letterSpacing: -0.2,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              SizedBox(height: context.heightPercent(5)),
 
               // Role selection buttons
-              Expanded(
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.widthPercent(5),
+                ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Student button
                     _buildRoleButton(
@@ -110,7 +285,9 @@ class RoleSelectionScreen extends StatelessWidget {
                       isPrimary: true,
                     ),
 
-                    const SizedBox(height: 16), // Admin button
+                    SizedBox(height: context.heightPercent(2)),
+
+                    // Admin button
                     _buildRoleButton(
                       context: context,
                       title: 'Admin',
@@ -123,23 +300,23 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              SizedBox(height: context.heightPercent(5)),
 
               // Footer
               Text(
                 '© 2025 Daffodil International University',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: context.isTablet ? 15.0 : 13.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black.withOpacity(0.4),
                   letterSpacing: -0.1,
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 34),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -151,12 +328,23 @@ class RoleSelectionScreen extends StatelessWidget {
     required VoidCallback onTap,
     required bool isPrimary,
   }) {
+    // Responsive values using our utility class
+    final buttonHeight = ResponsiveUtils.getButtonHeight(
+      context,
+      baseHeight: 88.0,
+    );
+    final iconSize = context.responsiveIcon(56.0);
+    final iconContainerRadius = context.responsiveRadius(14.0);
+    final titleFontSize = context.responsiveFont(20.0);
+    final subtitleFontSize = context.responsiveFont(15.0);
+    final padding = ResponsiveUtils.getButtonPadding(context);
+
     return Container(
       width: double.infinity,
-      height: 88,
+      height: buttonHeight,
       decoration: BoxDecoration(
         color: isPrimary ? const Color(0xFF007AFF) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.responsiveRadius(16.0)),
         border:
             isPrimary
                 ? null
@@ -176,30 +364,30 @@ class RoleSelectionScreen extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(context.responsiveRadius(16.0)),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: padding,
             child: Row(
               children: [
                 // Icon container
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: iconSize,
+                  height: iconSize,
                   decoration: BoxDecoration(
                     color:
                         isPrimary
                             ? Colors.white.withOpacity(0.2)
                             : const Color(0xFF007AFF).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(iconContainerRadius),
                   ),
                   child: Icon(
                     icon,
-                    size: 28,
+                    size: iconSize * 0.5,
                     color: isPrimary ? Colors.white : const Color(0xFF007AFF),
                   ),
                 ),
 
-                const SizedBox(width: 16),
+                SizedBox(width: context.widthPercent(4)),
 
                 // Text content
                 Expanded(
@@ -210,7 +398,7 @@ class RoleSelectionScreen extends StatelessWidget {
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: titleFontSize,
                           fontWeight: FontWeight.w600,
                           color:
                               isPrimary
@@ -219,11 +407,11 @@ class RoleSelectionScreen extends StatelessWidget {
                           letterSpacing: -0.2,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: context.heightPercent(0.3)),
                       Text(
                         subtitle,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: subtitleFontSize,
                           fontWeight: FontWeight.w400,
                           color:
                               isPrimary
@@ -239,7 +427,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 // Arrow icon
                 Icon(
                   Icons.arrow_forward_ios_rounded,
-                  size: 16,
+                  size: context.isTablet ? 18 : 16,
                   color:
                       isPrimary
                           ? Colors.white.withOpacity(0.8)
