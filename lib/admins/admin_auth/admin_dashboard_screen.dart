@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../admin_tabs/admin_dashboard_tab.dart';
-import '../../admin_tabs/admin_schedule_tab.dart';
-import '../../admin_tabs/admin_manage_tab.dart';
-import '../../admin_tabs/admin_profile_tab.dart';
+import '../admin_tabs/admin_dashboard_tab.dart';
+import '../admin_tabs/admin_schedule_tab.dart';
+import '../admin_tabs/admin_manage_tab.dart';
+import '../admin_tabs/admin_profile_tab.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});

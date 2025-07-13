@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/role_selection_screen.dart';
+import 'tabs/role_selection_screen.dart';
 
 void main() {
   runApp(const DiuBusBuddyApp());
