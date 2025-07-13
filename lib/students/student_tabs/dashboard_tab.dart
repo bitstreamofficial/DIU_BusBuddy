@@ -1,3 +1,4 @@
+import 'package:diu_busbuddy/students/student_auth/backend/shared_preferences_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -22,11 +23,20 @@ class _DashboardTabState extends State<DashboardTab> {
     '8:00 PM',
     '9:00 PM',
   ];
+  String _userName = '';
 
   @override
   void initState() {
     super.initState();
+    _loadUserName();
     _startTimer();
+  }
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferencesService.getInstance();
+    final name = prefs.getUserName();
+    setState(() {
+      _userName = name?.isNotEmpty == true ? name! : 'User';
+    });
   }
 
   @override
@@ -70,9 +80,9 @@ class _DashboardTabState extends State<DashboardTab> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Shakib Howlader',
-                        style: TextStyle(
+                      Text(
+                        _userName,
+                        style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF000000),

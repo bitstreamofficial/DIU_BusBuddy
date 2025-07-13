@@ -1,3 +1,5 @@
+import 'package:diu_busbuddy/students/student_auth/backend/auth_service.dart';
+import 'package:diu_busbuddy/students/student_auth/backend/shared_preferences_service.dart';
 import 'package:flutter/material.dart';
 import 'student_signup_screen.dart';
 import 'student_dashboard_screen.dart';
@@ -14,6 +16,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = AuthService();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
@@ -183,7 +186,9 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                   onPressed: _isLoading ? null : _handleLogin,
                   isLoading: _isLoading,
                 ),
-                const SizedBox(height: 24), // Small guest login option
+                const SizedBox(height: 24),
+                
+                // Guest login option
                 Center(
                   child: Container(
                     decoration: BoxDecoration(
@@ -349,23 +354,22 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           size: 20,
           color: Colors.black.withOpacity(0.4),
         ),
-        suffixIcon:
-            isPassword
-                ? IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  },
-                  icon: Icon(
-                    _isPasswordVisible
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    size: 20,
-                    color: Colors.black.withOpacity(0.4),
-                  ),
-                )
-                : null,
+        suffixIcon: isPassword
+            ? IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
+                icon: Icon(
+                  _isPasswordVisible
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 20,
+                  color: Colors.black.withOpacity(0.4),
+                ),
+              )
+            : null,
         filled: true,
         fillColor: const Color(0xFFF8F9FA),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -413,16 +417,15 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       height: 50,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        boxShadow:
-            onPressed != null
-                ? [
-                  BoxShadow(
-                    color: const Color(0xFF007AFF).withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-                : null,
+        boxShadow: onPressed != null
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF007AFF).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: ElevatedButton(
         onPressed: onPressed,
@@ -435,24 +438,23 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child:
-            isLoading
-                ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-                : Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.2,
-                  ),
+        child: isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
+              )
+            : Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2,
+                ),
+              ),
       ),
     );
   }
@@ -463,21 +465,54 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         _isLoading = true;
       });
 
-      // Simulate login delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      }); // TODO: Implement actual login logic
-      if (mounted) {
-        // Navigate to dashboard and remove all previous routes
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const StudentDashboardScreen(),
-          ),
-          (route) => false,
+      try {
+        // Use AuthService to sign in
+        AuthResult result = await _authService.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
+
+        if (mounted) {
+          if (result.isSuccess) {
+            // Save login state to SharedPreferences
+            final prefsService = await SharedPreferencesService.getInstance();
+            
+            // Get additional user data
+            final userData = await _authService.getUserData();
+            
+            await prefsService.saveLoginState(
+              userId: result.user!.uid,
+              email: result.user!.email!,
+              studentId: userData?['studentId'],
+              name: userData?['name'],
+            );
+            
+            // Show success message
+            _showSnackBar(result.message, isError: false);
+            
+            // Navigate to dashboard and remove all previous routes
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const StudentDashboardScreen(),
+              ),
+              (route) => false,
+            );
+          } else {
+            // Show error message
+            _showSnackBar(result.message, isError: true);
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          _showSnackBar('An unexpected error occurred. Please try again.', isError: true);
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -498,13 +533,109 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   }
 
   void _handleForgotPassword() {
-    // TODO: Navigate to forgot password screen
+    _showForgotPasswordDialog();
+  }
+
+  void _showForgotPasswordDialog() {
+    final TextEditingController emailController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text(
+            'Reset Password',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF000000),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Enter your email address and we\'ll send you a link to reset your password.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF666666),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  hintText: 'Enter your email address',
+                  prefixIcon: const Icon(Icons.mail_outline_rounded),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: Color(0xFF007AFF), width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Color(0xFF666666)),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (emailController.text.trim().isNotEmpty) {
+                  Navigator.of(context).pop();
+                  await _sendPasswordResetEmail(emailController.text.trim());
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF007AFF),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Send Reset Link',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _sendPasswordResetEmail(String email) async {
+    try {
+      AuthResult result = await _authService.sendPasswordResetEmail(email);
+      
+      if (mounted) {
+        _showSnackBar(result.message, isError: !result.isSuccess);
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar('Failed to send reset email. Please try again.', isError: true);
+      }
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Forgot password feature coming soon...'),
-        backgroundColor: const Color(0xFF007AFF),
+        content: Text(message),
+        backgroundColor: isError ? const Color(0xFFFF3B30) : const Color(0xFF007AFF),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 4),
       ),
     );
   }

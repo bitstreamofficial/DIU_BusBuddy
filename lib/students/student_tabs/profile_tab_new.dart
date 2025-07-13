@@ -1,5 +1,8 @@
 import 'dart:math';
+import 'package:diu_busbuddy/students/student_auth/backend/auth_service.dart';
+import 'package:diu_busbuddy/students/student_auth/backend/shared_preferences_service.dart';
 import 'package:diu_busbuddy/students/student_auth/ui/student_login_screen.dart';
+import 'package:diu_busbuddy/tabs/role_selection_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfileTab extends StatelessWidget {
@@ -1135,76 +1138,192 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
+  //logout
   void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.logout_rounded, color: Colors.red, size: 24),
-              SizedBox(width: 12),
-              Text(
-                'Logout',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF000000),
-                ),
-              ),
-            ],
-          ),
-          content: const Text(
-            'Are you sure you want to logout from your account?',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF666666),
-              height: 1.4,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF007AFF),
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _performLogout(context);
-              },
-              child: const Text(
-                'Logout',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.red,
-                ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.logout_rounded, color: Colors.red, size: 24),
+            SizedBox(width: 12),
+            Text(
+              'Logout',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF000000),
               ),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        content: const Text(
+          'Are you sure you want to logout from your account?',
+          style: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF666666),
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF007AFF),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _performLogout(context);
+            },
+            child: const Text(
+              'Logout',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.red,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
 
-  void _performLogout(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const StudentLoginScreen()),
-      (Route<dynamic> route) => false,
-    );
+Future<void> _performLogout(BuildContext context) async {
+  // Show loading indicator
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    },
+  );
+
+  try {
+    // Get instances of both services
+    final authService = AuthService();
+    final sharedPrefsService = await SharedPreferencesService.getInstance();
+
+    // Always clear SharedPreferences first
+    final prefsClearedSuccessfully = await sharedPrefsService.clearLoginState();
+    
+    // Then perform Firebase logout
+    final authResult = await authService.signOut();
+    
+    // Close loading dialog
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+
+    // Always navigate to login screen regardless of individual operation results
+    // This ensures the user is logged out even if one operation fails
+    if (context.mounted) {
+      // Show appropriate message
+      if (authResult.isSuccess && prefsClearedSuccessfully) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 8),
+                Text(authResult.message),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.warning, color: Colors.white),
+                const SizedBox(width: 8),
+                const Text('Logged out, but some data may not have been cleared'),
+              ],
+            ),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+      
+      // Navigate to role selection screen (or your login screen)
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const RoleSelectionScreen(), // Replace with your login screen
+        ),
+        (Route<dynamic> route) => false,
+      );
+    }
+    
+  } catch (e) {
+    print('Logout error: $e');
+    
+    // Close loading dialog if still open
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+
+    // Even if there's an error, try to clear local state and navigate away
+    try {
+      final sharedPrefsService = await SharedPreferencesService.getInstance();
+      await sharedPrefsService.clearLoginState();
+    } catch (clearError) {
+      print('Error clearing preferences during error handling: $clearError');
+    }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 8),
+              const Text('Logout completed with errors'),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      
+      // Navigate to role selection screen even if there was an error
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const StudentLoginScreen(),
+        ),
+        (Route<dynamic> route) => false,
+      );
+    }
   }
+}
 }
 
 // Custom painter for map background pattern

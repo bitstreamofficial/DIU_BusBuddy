@@ -1,7 +1,20 @@
+import 'package:diu_busbuddy/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'tabs/role_selection_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:diu_busbuddy/students/student_auth/backend/shared_preferences_service.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  // Initialize SharedPreferences
+  await SharedPreferencesService.getInstance();
+  
   runApp(const DiuBusBuddyApp());
 }
 
@@ -22,7 +35,7 @@ class DiuBusBuddyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Roboto',
       ),
-      home: const RoleSelectionScreen(),
+      home: const SplashScreen(),
     );
   }
 }

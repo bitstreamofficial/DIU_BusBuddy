@@ -1,3 +1,4 @@
+import 'package:diu_busbuddy/students/student_auth/backend/auth_service.dart';
 import 'package:flutter/material.dart';
 
 class StudentSignupScreen extends StatefulWidget {
@@ -9,6 +10,7 @@ class StudentSignupScreen extends StatefulWidget {
 
 class _StudentSignupScreenState extends State<StudentSignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _studentIdController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -18,8 +20,11 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
   bool _isLoading = false;
   bool _agreeToTerms = false;
 
+  final AuthService _authService = AuthService();
+
   @override
   void dispose() {
+    _nameController.dispose();
     _studentIdController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -110,6 +115,26 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
                 ),
 
                 const SizedBox(height: 40),
+
+                // Name field
+                _buildTextField(
+                  controller: _nameController,
+                  label: 'Full Name',
+                  hintText: 'Enter your full name',
+                  keyboardType: TextInputType.name,
+                  prefixIcon: Icons.person_outline_rounded,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your full name';
+                    }
+                    if (value.trim().length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 20),
 
                 // Student ID field
                 _buildTextField(
@@ -519,30 +544,47 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
         _isLoading = true;
       });
 
-      // Simulate signup delay
-      await Future.delayed(const Duration(seconds: 2));
+      // Call Firebase Auth service with name
+      AuthResult result = await _authService.signUpWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim(),
+        studentId: _studentIdController.text.trim(),
+      );
 
       setState(() {
         _isLoading = false;
       });
 
-      // TODO: Implement actual signup logic
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Account created successfully! Welcome ${_studentIdController.text}',
+        if (result.isSuccess) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.message),
+              backgroundColor: const Color(0xFF34C759),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            backgroundColor: const Color(0xFF34C759),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
+          );
 
-        // Navigate back to login screen after successful signup
-        Navigator.pop(context);
+          // Navigate back to login screen
+          Navigator.pop(context);
+        } else {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.message),
+              backgroundColor: const Color(0xFFFF3B30),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
       }
     }
   }
