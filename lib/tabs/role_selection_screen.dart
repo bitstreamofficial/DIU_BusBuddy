@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../students/student_auth/student_login_screen.dart';
+import '../students/student_auth/ui/student_login_screen.dart';
 import '../admins/admin_auth/admin_login_screen.dart';
 import '../utils/responsive_utils.dart';
 

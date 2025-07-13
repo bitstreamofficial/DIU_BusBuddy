@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:diu_busbuddy/students/student_auth/student_login_screen.dart';
+import 'package:diu_busbuddy/students/student_auth/ui/student_login_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfileTab extends StatelessWidget {

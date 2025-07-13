@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../student_tabs/dashboard_tab.dart';
-import '../student_tabs/schedule_tab.dart';
-import '../student_tabs/notice_tab.dart';
-import '../student_tabs/profile_tab.dart';
+import '../../student_tabs/dashboard_tab.dart';
+import '../../student_tabs/schedule_tab.dart';
+import '../../student_tabs/notice_tab.dart';
+import '../../student_tabs/profile_tab.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
